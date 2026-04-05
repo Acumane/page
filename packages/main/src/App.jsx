@@ -1,4 +1,4 @@
-import Reticle from './Reticle'
+// import Reticle from './Reticle'
 import Nav from '@bren/shared/Nav'
 
 const links = [
@@ -10,7 +10,7 @@ const links = [
 export default function App() {
   return (
     <>
-      <Reticle />
+      {/* <Reticle /> */}
       <pre className="greet">{
 `############## WIP ##############
 #

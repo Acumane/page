@@ -1,0 +1,16 @@
+{
+  "name": "@bren/shared",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./tokens.css": "./tokens.css",
+    "./Nav": "./src/Nav.jsx"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "dependencies": {
+    "framer-motion": "^12.38.0",
+    "liquid-glass-react": "^1.1.1"
+  }
+}

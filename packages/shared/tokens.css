@@ -1,0 +1,12 @@
+:root {
+  --bg: #0B0414;
+  --bg-raised: #12091F;
+  --fg: #CFCAAF;
+  --fg-dim: #6A6650;
+  --fg-dark: #505065;
+  --fg-bright: #E8E4D4;
+  --border: #1E1630;
+  --select: #B9C3FF;
+  --neon: #D0FC0A;
+  --font: 'JetBrains Mono', monospace;
+}
