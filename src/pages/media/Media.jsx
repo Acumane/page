@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Header from './Header'
 import Card from './Card'
 import Toast from './Toast'
-import Nav from '@bren/shared/Nav'
+import './media.css'
 
 const MEDIA_EXTS = ['.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm']
 
@@ -24,8 +25,11 @@ function stripExt(name) {
   return i > 0 ? name.slice(0, i) : name
 }
 
-export default function App() {
-  const [path, setPath] = useState(decodeURIComponent(window.location.pathname))
+export default function Media() {
+  const location = useLocation()
+  const routerNavigate = useNavigate()
+  const path = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/'
+
   const [items, setItems] = useState(null)
   const [denied, setDenied] = useState(false)
   const [query, setQuery] = useState('')
@@ -36,20 +40,17 @@ export default function App() {
 
   const navigate = useCallback((newPath) => {
     const normalized = newPath.endsWith('/') ? newPath : newPath + '/'
-    window.history.pushState(null, '', normalized)
-    setPath(normalized)
+    routerNavigate(normalized)
+  }, [routerNavigate])
+
+  // Reset search/selection on path change
+  useEffect(() => {
     setQuery('')
     setSelectedIdx(-1)
-  }, [])
+  }, [path])
 
   useEffect(() => {
-    const onPop = () => {
-      setPath(decodeURIComponent(window.location.pathname))
-      setQuery('')
-      setSelectedIdx(-1)
-    }
-    window.addEventListener('popstate', onPop)
-    return () => window.removeEventListener('popstate', onPop)
+    document.title = 'media \u2014 bren.page'
   }, [])
 
   useEffect(() => {
@@ -65,10 +66,6 @@ export default function App() {
       .catch(() => setDenied(true))
   }, [path])
 
-  useEffect(() => {
-    document.title = window.location.hostname
-  }, [])
-
   // scroll shadow
   useEffect(() => {
     const hdr = headerRef.current
@@ -82,7 +79,7 @@ export default function App() {
     (!query || item.name.toLowerCase().includes(query.toLowerCase()))
   ) ?? []
 
-  const canGoUp = path !== '/'
+  const canGoUp = path !== '/media/'
 
   const visibleCards = (canGoUp ? 1 : 0) + filtered.length
 
@@ -189,7 +186,6 @@ export default function App() {
         }
       } else if (e.key === 'Enter' && selectedIdx >= 0) {
         e.preventDefault()
-        // figure out which item is at this index
         const adjustedIdx = canGoUp ? selectedIdx - 1 : selectedIdx
         if (canGoUp && selectedIdx === 0) {
           navigate(path.replace(/[^/]+\/$/, ''))
@@ -210,19 +206,18 @@ export default function App() {
 
   if (denied) {
     return (
-      <>
-        <Header path={path} headerRef={headerRef} />
+      <div className="page-media">
+        <Header path={path} headerRef={headerRef} onNavigate={navigate} />
         <div className="denied">
           <span className="material-symbols-sharp">lock</span>
           <span>permission denied</span>
         </div>
-        <Nav />
-      </>
+      </div>
     )
   }
 
   return (
-    <>
+    <div className="page-media">
       <Header
         path={path}
         query={query}
@@ -272,7 +267,6 @@ export default function App() {
         })}
       </div>
       <Toast message={toast} />
-      <Nav />
-    </>
+    </div>
   )
 }

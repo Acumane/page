@@ -4,6 +4,7 @@ export default function Header({ path, query, onQueryChange, onNavigate, headerR
   const inputRef = useRef(null)
 
   const segments = path.split('/').filter(Boolean)
+  // segments[0] is 'media' — shown as brand, rest as breadcrumbs
 
   function handleInput(e) {
     const val = e.target.value
@@ -14,9 +15,9 @@ export default function Header({ path, query, onQueryChange, onNavigate, headerR
   return (
     <header ref={headerRef}>
       <nav className="breadcrumbs">
-        <a className="brand" onClick={() => onNavigate?.('/')}>MEDIA</a>
-        {segments.map((seg, i) => {
-          const href = '/' + segments.slice(0, i + 1).join('/') + '/'
+        <a className="brand" onClick={() => onNavigate?.('/media/')}>MEDIA</a>
+        {segments.slice(1).map((seg, i) => {
+          const href = '/' + segments.slice(0, i + 2).join('/') + '/'
           return (
             <span key={href}>
               <span className="sep">/</span>

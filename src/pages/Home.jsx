@@ -1,5 +1,5 @@
-// import Reticle from './Reticle'
-import Nav from '@bren/shared/Nav'
+import { useEffect } from 'react'
+import './home.css'
 
 const links = [
   { label: 'GitHub', href: 'https://github.com/Acumane' },
@@ -7,10 +7,11 @@ const links = [
   { label: 'Careers', href: 'https://machindustries.com/careers' },
 ]
 
-export default function App() {
+export default function Home() {
+  useEffect(() => { document.title = 'bren.page' }, [])
+
   return (
-    <>
-      {/* <Reticle /> */}
+    <div className="page-home">
       <pre className="greet">{
 `############## WIP ##############
 #
@@ -18,11 +19,10 @@ export default function App() {
 # software @ Mach (we're hiring)
 #
 `}{links.map((l, i) => (
-          <span key={i}>#  * <a href={l.href} data-act="↗">{l.label}</a>{'\n'}</span>
+          <span key={i}>#  * <a href={l.href} data-act="^">{l.label}</a>{'\n'}</span>
         ))}{
 `#`}
-    </pre>
-      <Nav />
-    </>
+      </pre>
+    </div>
   )
 }

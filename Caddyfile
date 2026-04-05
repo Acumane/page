@@ -1,43 +1,53 @@
-media.bren.page {
+bren.page {
 	tls {
 		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
 
-	# SPA — serve React build, fallback to index.html for client routes
-	@spa {
-		not header Accept application/json
-		not path /api/*
-		not path /.thumbs/*
-		not file {path}
+	# Media file operations (JSON listings, downloads, thumbnails)
+	handle_path /media/* {
+		root * "/home/bren/Storage/Movies & TV"
+
+		@json header Accept application/json
+		@tailnet remote_ip 100.64.0.0/10
+
+		handle @json {
+			handle @tailnet {
+				file_server browse
+			}
+			handle {
+				respond 403
+			}
+		}
+
+		@realFile file {path}
+		handle @realFile {
+			handle @tailnet {
+				file_server
+			}
+			handle {
+				respond 403
+			}
+		}
+
+		# Not a real file — SPA fallback
+		handle {
+			root * /home/bren/proj/page/dist
+			rewrite * /index.html
+			file_server
+		}
 	}
 
-	handle @spa {
-		root * /home/bren/proj/page/packages/media/dist
+	# SPA (home + client-side routes)
+	handle {
+		root * /home/bren/proj/page/dist
 		try_files {path} /index.html
 		file_server
 	}
+}
 
-	# Static assets from the React build (js, css, etc.)
-	@assets {
-		path /assets/*
+media.bren.page {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
-
-	handle @assets {
-		root * /home/bren/proj/page/packages/media/dist
-		file_server
-	}
-
-	# Everything else — file listings (JSON) and file downloads
-	handle {
-		root * "/home/bren/Storage/Movies & TV"
-
-		@tailnet remote_ip 100.64.0.0/10
-		handle @tailnet {
-			file_server browse
-		}
-
-		handle {
-			respond 403
-		}
-	}
+	redir * https://bren.page/media{uri} permanent
 }

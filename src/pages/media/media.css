@@ -1,35 +1,15 @@
-@import '@bren/shared/tokens.css';
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-html {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font);
+.page-media {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  padding-bottom: 96px;
   font-size: 13px;
   line-height: 1.4;
-  scrollbar-color: #3F3F50 transparent;
-  scrollbar-width: thin;
 }
 
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #3F3F50; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--fg-dim); }
-
-body { min-height: 100vh; display: flex; flex-direction: column; padding: 8px; padding-bottom: 96px; }
-#root { flex: 1; display: flex; flex-direction: column; }
-
-.material-symbols-sharp {
-  font-family: 'Material Symbols Sharp';
-  font-size: 20px;
-  line-height: 1;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-/* ── HEADER ── */
-header {
+/* -- HEADER -- */
+.page-media header {
   border-bottom: 1px solid var(--border);
   padding: 10px 20px;
   display: flex;
@@ -44,7 +24,7 @@ header {
   transition: box-shadow 0.2s;
 }
 
-header.scrolled {
+.page-media header.scrolled {
   box-shadow: 0 8px 40px 16px rgba(0, 0, 0, 0.7);
 }
 
@@ -62,7 +42,7 @@ header.scrolled {
 .breadcrumbs .brand { color: var(--fg-bright); font-weight: 600; }
 .breadcrumbs .sep { color: var(--fg-dim); margin: 0 1px; opacity: 0.5; }
 
-/* ── SEARCH ── */
+/* -- SEARCH -- */
 .search-wrap {
   position: relative;
   display: flex;
@@ -115,7 +95,7 @@ header.scrolled {
 .search-input::placeholder { color: var(--fg-dim); opacity: 0.3; }
 .search-input:not(:focus):not(.has-text)::placeholder { color: transparent; }
 
-/* ── GRID ── */
+/* -- GRID -- */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -125,7 +105,7 @@ header.scrolled {
   flex: 1;
 }
 
-/* ── CARD ── */
+/* -- CARD -- */
 .card {
   display: flex;
   flex-direction: column;
@@ -234,13 +214,13 @@ header.scrolled {
 .dl-btn:hover { color: var(--fg-bright); }
 .card:hover .dl-btn, .card.selected .dl-btn { display: block; }
 
-/* ── GO UP ── */
+/* -- GO UP -- */
 .card.go-up .card-thumb { background: var(--bg-raised); }
 .card.go-up.selected .card-thumb { background: var(--bg-raised); }
 .card.go-up .card-name { color: var(--fg-dim); }
 .card.go-up.selected .card-name { color: var(--bg); }
 
-/* ── DENIED ── */
+/* -- DENIED -- */
 .denied {
   flex: 1;
   display: flex;
@@ -254,7 +234,7 @@ header.scrolled {
 
 .denied .material-symbols-sharp { font-size: 48px; opacity: 0.3; }
 
-/* ── TOAST ── */
+/* -- TOAST -- */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -280,5 +260,5 @@ header.scrolled {
 @media (max-width: 600px) {
   .grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
   .search-input:focus { width: 160px; }
-  header { padding-left: 12px; padding-right: 12px; }
+  .page-media header { padding-left: 12px; padding-right: 12px; }
 }

@@ -1,0 +1,36 @@
+.page-home {
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.greet {
+  color: var(--fg-dark);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.page-home a {
+  color: var(--select);
+  text-decoration: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.page-home a::before {
+  content: "";
+  position: absolute;
+  top: -10px; right: -10px; bottom: -10px; left: -10px;
+}
+
+.page-home a:hover,
+.page-home a:focus {
+  color: var(--neon);
+  text-decoration: wavy underline;
+}

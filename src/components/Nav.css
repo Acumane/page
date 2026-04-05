@@ -16,7 +16,18 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
+.nav-pill {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  border-radius: 999px;
+  background: #2A2A37;
+  z-index: 0;
+}
+
 .nav-item {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -30,21 +41,16 @@
   font-size: 13px;
   cursor: pointer;
   overflow: hidden;
-  transition: color 0.15s, background 0.15s;
-}
-
-.nav-item:hover {
-  color: var(--fg-bright) !important;
-  background: #2A2A37;
-}
-
-.nav-item.active {
-  color: var(--fg-bright) !important;
-  background: #2A2A37;
+  transition: color 0.15s;
 }
 
 .nav-item::before {
   display: none !important;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  color: #E6E0C2 !important;
 }
 
 .nav-item .material-symbols-sharp {
