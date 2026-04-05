@@ -1,10 +1,43 @@
 media.bren.page {
-	bind 100.90.50.101
 	tls {
 		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
-	root * "/home/bren/Storage/Movies & TV"
-	file_server {
-		browse /home/bren/.config/caddy/browse.html
+
+	# SPA — serve React build, fallback to index.html for client routes
+	@spa {
+		not header Accept application/json
+		not path /api/*
+		not path /.thumbs/*
+		not file {path}
+	}
+
+	handle @spa {
+		root * /home/bren/proj/page/packages/media/dist
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Static assets from the React build (js, css, etc.)
+	@assets {
+		path /assets/*
+	}
+
+	handle @assets {
+		root * /home/bren/proj/page/packages/media/dist
+		file_server
+	}
+
+	# Everything else — file listings (JSON) and file downloads
+	handle {
+		root * "/home/bren/Storage/Movies & TV"
+
+		@tailnet remote_ip 100.64.0.0/10
+		handle @tailnet {
+			file_server browse
+		}
+
+		handle {
+			respond 403
+		}
 	}
 }

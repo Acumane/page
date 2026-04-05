@@ -1,5 +1,5 @@
 {
-  "name": "site",
+  "name": "@bren/main",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bren/shared": "*",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },

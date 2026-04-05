@@ -1,4 +1,5 @@
 import Reticle from './Reticle'
+import Nav from '@bren/shared/Nav'
 
 const links = [
   { label: 'GitHub', href: 'https://github.com/Acumane' },
@@ -21,6 +22,7 @@ export default function App() {
         ))}{
 `#`}
     </pre>
+      <Nav />
     </>
   )
 }
