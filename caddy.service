@@ -1,0 +1,14 @@
+[Unit]
+Description=Caddy media server
+After=network-online.target
+
+[Service]
+Type=notify
+Environment=CLOUDFLARE_API_TOKEN=REDACTED
+ExecStart=/home/bren/.local/bin/caddy run --config /home/bren/.config/caddy/Caddyfile
+ExecReload=/home/bren/.local/bin/caddy reload --config /home/bren/.config/caddy/Caddyfile
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

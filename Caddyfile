@@ -1,0 +1,10 @@
+media.bren.page {
+	bind 100.90.50.101
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+	root * "/home/bren/Storage/Movies & TV"
+	file_server {
+		browse /home/bren/.config/caddy/browse.html
+	}
+}
