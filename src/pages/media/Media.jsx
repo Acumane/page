@@ -5,7 +5,7 @@ import Card from './Card'
 import Toast from './Toast'
 import './media.css'
 
-const MEDIA_API = 'https://media.bren.page'
+const MEDIA_API = import.meta.env.DEV ? '/api/media' : 'https://media.bren.page'
 const MEDIA_EXTS = ['.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm']
 
 function mediaUrl(spaPath) {
@@ -36,7 +36,7 @@ export default function Media() {
   const path = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/'
 
   const [items, setItems] = useState(null)
-  const [denied, setDenied] = useState(null)
+  const [denied, setDenied] = useState(false)
   const [query, setQuery] = useState('')
   const [selectedIdx, setSelectedIdx] = useState(-1)
   const [toast, setToast] = useState('')
@@ -78,15 +78,11 @@ export default function Media() {
 
   useEffect(() => {
     setItems(null)
-    // setDenied(403); return
+    setDenied(false)
     fetch(mediaUrl(path), { headers: { Accept: 'application/json' } })
-      .then(res => {
-        if (res.status === 403 || res.status === 401) { setDenied(res.status); return null }
-        if (!res.ok) { setDenied(res.status); return null }
-        return res.json()
-      })
-      .then(data => { if (data) setItems(data) })
-      .catch(() => setDenied(0))
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => setItems(data))
+      .catch(() => setDenied(true))
   }, [path])
 
   const filtered = items?.filter(item =>
@@ -242,10 +238,10 @@ export default function Media() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [selectedIdx, query, items, path, canGoUp, filtered, visibleCards, navigate])
 
-  if (denied !== null) {
+  if (denied) {
     return (
       <div className="page-media">
-        <pre className="denied-greet">{`# Error ${denied || '???'} — not authorized`}</pre>
+        <pre className="denied-greet"># Unreachable</pre>
       </div>
     )
   }

@@ -94,6 +94,14 @@ export default function Nav() {
     animate(pillRight, items[active].right, SNAP)
   }, [hovered])
 
+  // Lock nav height after first render to prevent shrink during transitions
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav || nav.style.minHeight) return
+    const h = nav.offsetHeight
+    if (h > 0) nav.style.minHeight = h + 'px'
+  })
+
   // Re-snap pill when nav resizes (label expand, font load, etc.)
   useEffect(() => {
     if (!navRef.current) return
