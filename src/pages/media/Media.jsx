@@ -157,7 +157,9 @@ export default function Media() {
         if (card) {
           e.preventDefault()
           const url = card.dataset.url
-          if (url) navigator.clipboard.writeText(window.location.origin + url).then(() => showToast('Copied URL'))
+          if (url && !url.endsWith('/')) {
+            navigator.clipboard.writeText(MEDIA_API + url.replace(/^\/media/, '')).then(() => showToast('Copied URL'))
+          }
         }
         return
       }
@@ -276,11 +278,11 @@ export default function Media() {
               thumbSrc={isMedia ? `${mediaUrl(path)}.thumbs/${encodeURIComponent(stripExt(item.name))}.png` : null}
               url={path + encodeURIComponent(item.name) + (item.is_dir ? '/' : '')}
               selected={selectedIdx === idx}
-              onClick={() => {
-                if (item.is_dir) navigate(path + item.name + '/')
-                else window.location.href = mediaUrl(path) + encodeURIComponent(item.name)
-              }}
+              onClick={item.is_dir ? () => navigate(path + item.name + '/') : null}
               onSelect={() => setSelectedIdx(idx)}
+              onPlay={isMedia ? () => {
+                window.location.href = mediaUrl(path) + encodeURIComponent(item.name)
+              } : null}
               onDownload={!item.is_dir ? () => {
                 const a = document.createElement('a')
                 a.href = mediaUrl(path) + encodeURIComponent(item.name)

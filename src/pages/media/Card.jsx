@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 export default function Card({
   isDir, isGoUp, isMedia, name, displayName, size,
-  thumbSrc, url, selected, onClick, onSelect, onDownload,
+  thumbSrc, url, selected, onClick, onSelect, onDownload, onPlay,
 }) {
   const [thumbError, setThumbError] = useState(false)
   const [thumbLoaded, setThumbLoaded] = useState(false)
@@ -27,9 +27,16 @@ export default function Card({
     onDownload?.()
   }
 
+  function handlePlay(e) {
+    if (selected && isMedia && onPlay) {
+      e.stopPropagation()
+      onPlay()
+    }
+  }
+
   return (
     <div className={classes} onClick={handleClick} data-name={name} data-url={url}>
-      <div className="card-thumb">
+      <div className="card-thumb" onClick={handlePlay}>
         {isGoUp ? (
           <span className="material-symbols-sharp">arrow_upward</span>
         ) : isDir ? (
@@ -37,10 +44,13 @@ export default function Card({
         ) : thumbSrc && !thumbError ? (
           <img loading="lazy" src={thumbSrc} alt="" onLoad={() => setThumbLoaded(true)} onError={() => setThumbError(true)} />
         ) : isMedia ? (
-          <span className="material-symbols-sharp">movie</span>
+          selected
+            ? <span className="play-btn material-symbols-sharp">play_arrow</span>
+            : <span className="material-symbols-sharp">movie</span>
         ) : (
           <span className="material-symbols-sharp">description</span>
         )}
+        {selected && isMedia && thumbSrc && !thumbError && <span className="play-btn material-symbols-sharp">play_arrow</span>}
       </div>
       <div className="card-info">
         <div className="card-text">

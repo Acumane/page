@@ -121,7 +121,6 @@ body.scroll-bottom::after { opacity: 1; }
   border: 2px solid transparent;
   border-radius: 2px;
   transition: border-color 0.1s, background 0.1s, transform 0.15s, box-shadow 0.15s, opacity 0.3s;
-  overflow: hidden;
   position: relative;
   cursor: pointer;
 }
@@ -130,9 +129,11 @@ body.scroll-bottom::after { opacity: 1; }
   opacity: 0.5;
 }
 
-.card:hover {
-  border-color: var(--border);
-  background: var(--bg-raised);
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--border);
+    background: var(--bg-raised);
+  }
 }
 
 .card.selected {
@@ -141,7 +142,6 @@ body.scroll-bottom::after { opacity: 1; }
   color: var(--bg);
   z-index: 10;
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(10, 8, 21, 0.5);
 }
 
 .card.selected .card-name { color: var(--bg); }
@@ -167,7 +167,7 @@ body.scroll-bottom::after { opacity: 1; }
   justify-content: center;
   overflow: hidden;
   border-radius: 2px;
-  transition: border-color 0.1s;
+  position: relative;
 }
 
 
@@ -182,6 +182,24 @@ body.scroll-bottom::after { opacity: 1; }
   font-size: 28px;
   color: var(--fg-dim);
   opacity: 0.4;
+}
+
+.card-thumb {
+  position: relative;
+}
+
+.card-thumb .play-btn.material-symbols-sharp {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: #fff;
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  border-radius: 2px;
 }
 
 .card-info {
@@ -226,7 +244,10 @@ body.scroll-bottom::after { opacity: 1; }
 
 .dl-btn .material-symbols-sharp { font-size: 16px; font-variation-settings: 'wght' 350; }
 .dl-btn:hover { color: var(--fg-bright); }
-.card:hover .dl-btn, .card.selected .dl-btn { display: block; }
+.card.selected .dl-btn { display: block; }
+@media (hover: hover) {
+  .card:hover .dl-btn { display: block; }
+}
 
 /* Go up */
 .card.go-up .card-thumb { background: var(--bg-raised); }
