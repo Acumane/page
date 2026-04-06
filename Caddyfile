@@ -49,5 +49,37 @@ media.bren.page {
 	tls {
 		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
-	redir * https://bren.page/media{uri} permanent
+
+	header {
+		Access-Control-Allow-Origin https://bren.page
+		Access-Control-Allow-Headers Accept
+	}
+
+	root * "/home/bren/Storage/Movies & TV"
+
+	@json header Accept application/json
+	@tailnet remote_ip 100.64.0.0/10
+
+	handle @json {
+		handle @tailnet {
+			file_server browse
+		}
+		handle {
+			respond 403
+		}
+	}
+
+	@realFile file {path}
+	handle @realFile {
+		handle @tailnet {
+			file_server
+		}
+		handle {
+			respond 403
+		}
+	}
+
+	handle {
+		respond 404
+	}
 }

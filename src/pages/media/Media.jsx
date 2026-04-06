@@ -5,7 +5,12 @@ import Card from './Card'
 import Toast from './Toast'
 import './media.css'
 
+const MEDIA_API = 'https://media.bren.page'
 const MEDIA_EXTS = ['.mp4', '.mkv', '.avi', '.mov', '.m4v', '.webm']
+
+function mediaUrl(spaPath) {
+  return MEDIA_API + spaPath.replace(/^\/media/, '')
+}
 
 function humanSize(bytes) {
   if (bytes < 1024) return bytes + ' B'
@@ -74,7 +79,7 @@ export default function Media() {
   useEffect(() => {
     setItems(null)
     // setDenied(403); return
-    fetch(path, { headers: { Accept: 'application/json' } })
+    fetch(mediaUrl(path), { headers: { Accept: 'application/json' } })
       .then(res => {
         if (res.status === 403 || res.status === 401) { setDenied(res.status); return null }
         if (!res.ok) { setDenied(res.status); return null }
@@ -223,7 +228,7 @@ export default function Media() {
         } else if (filtered[adjustedIdx]?.is_dir) {
           navigate(path + filtered[adjustedIdx].name + '/')
         } else if (filtered[adjustedIdx]) {
-          window.location.href = path + encodeURIComponent(filtered[adjustedIdx].name)
+          window.location.href = mediaUrl(path) + encodeURIComponent(filtered[adjustedIdx].name)
         }
         return
       } else return
@@ -240,7 +245,7 @@ export default function Media() {
   if (denied !== null) {
     return (
       <div className="page-media">
-        <pre className="denied-greet">{`# Error ${denied || '???'} — Not authorized`}</pre>
+        <pre className="denied-greet">{`# Error ${denied || '???'} — not authorized`}</pre>
       </div>
     )
   }
@@ -272,17 +277,17 @@ export default function Media() {
               name={item.name}
               displayName={item.is_dir ? item.name : stripExt(item.name)}
               size={item.is_dir ? null : humanSize(item.size)}
-              thumbSrc={isMedia ? `${path}.thumbs/${encodeURIComponent(stripExt(item.name))}.png` : null}
+              thumbSrc={isMedia ? `${mediaUrl(path)}.thumbs/${encodeURIComponent(stripExt(item.name))}.png` : null}
               url={path + encodeURIComponent(item.name) + (item.is_dir ? '/' : '')}
               selected={selectedIdx === idx}
               onClick={() => {
                 if (item.is_dir) navigate(path + item.name + '/')
-                else window.location.href = path + encodeURIComponent(item.name)
+                else window.location.href = mediaUrl(path) + encodeURIComponent(item.name)
               }}
               onSelect={() => setSelectedIdx(idx)}
               onDownload={!item.is_dir ? () => {
                 const a = document.createElement('a')
-                a.href = path + encodeURIComponent(item.name)
+                a.href = mediaUrl(path) + encodeURIComponent(item.name)
                 a.download = ''
                 a.click()
               } : null}
