@@ -1,3 +1,8 @@
+import { useRef } from 'react'
+
 export default function Toast({ message }) {
-  return <div className={`toast${message ? ' visible' : ''}`}>{message}</div>
+  const lastMessage = useRef('')
+  if (message) lastMessage.current = message
+
+  return <div className={`toast${message ? ' visible' : ''}`}>{lastMessage.current}</div>
 }

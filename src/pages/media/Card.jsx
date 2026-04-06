@@ -5,6 +5,8 @@ export default function Card({
   thumbSrc, url, selected, onClick, onSelect, onDownload,
 }) {
   const [thumbError, setThumbError] = useState(false)
+  const [thumbLoaded, setThumbLoaded] = useState(false)
+  const pending = thumbSrc && !thumbError && !thumbLoaded
 
   const classes = [
     'card',
@@ -12,6 +14,7 @@ export default function Card({
     isMedia && 'is-media',
     isGoUp && 'go-up',
     selected && 'selected',
+    pending && 'thumb-pending',
   ].filter(Boolean).join(' ')
 
   function handleClick(e) {
@@ -32,7 +35,7 @@ export default function Card({
         ) : isDir ? (
           <span className="material-symbols-sharp">folder</span>
         ) : thumbSrc && !thumbError ? (
-          <img loading="lazy" src={thumbSrc} alt="" onError={() => setThumbError(true)} />
+          <img loading="lazy" src={thumbSrc} alt="" onLoad={() => setThumbLoaded(true)} onError={() => setThumbError(true)} />
         ) : isMedia ? (
           <span className="material-symbols-sharp">movie</span>
         ) : (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import Header from './Header'
+import Search from './Header'
 import Card from './Card'
 import Toast from './Toast'
 import './media.css'
@@ -31,12 +31,12 @@ export default function Media() {
   const path = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/'
 
   const [items, setItems] = useState(null)
-  const [denied, setDenied] = useState(false)
+  const [denied, setDenied] = useState(null)
   const [query, setQuery] = useState('')
   const [selectedIdx, setSelectedIdx] = useState(-1)
   const [toast, setToast] = useState('')
   const gridRef = useRef(null)
-  const headerRef = useRef(null)
+  const lastSelectedIdx = useRef(-1)
 
   const navigate = useCallback((newPath) => {
     const normalized = newPath.endsWith('/') ? newPath : newPath + '/'
@@ -53,26 +53,36 @@ export default function Media() {
     document.title = 'media \u2014 bren.page'
   }, [])
 
+  // scroll shadows
+  useEffect(() => {
+    function update() {
+      const { scrollY, innerHeight } = window
+      const maxScroll = document.documentElement.scrollHeight - innerHeight
+      document.body.classList.toggle('scroll-top', scrollY > 0)
+      document.body.classList.toggle('scroll-bottom', scrollY < maxScroll - 1)
+    }
+    update()
+    window.addEventListener('scroll', update)
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+      document.body.classList.remove('scroll-top', 'scroll-bottom')
+    }
+  }, [items])
+
   useEffect(() => {
     setItems(null)
-    setDenied(false)
+    // setDenied(403); return
     fetch(path, { headers: { Accept: 'application/json' } })
       .then(res => {
-        if (res.status === 403 || res.status === 401) { setDenied(true); return null }
-        if (!res.ok) { setDenied(true); return null }
+        if (res.status === 403 || res.status === 401) { setDenied(res.status); return null }
+        if (!res.ok) { setDenied(res.status); return null }
         return res.json()
       })
       .then(data => { if (data) setItems(data) })
-      .catch(() => setDenied(true))
+      .catch(() => setDenied(0))
   }, [path])
-
-  // scroll shadow
-  useEffect(() => {
-    const hdr = headerRef.current
-    const onScroll = () => hdr.classList.toggle('scrolled', window.scrollY > 0)
-    document.addEventListener('scroll', onScroll)
-    return () => document.removeEventListener('scroll', onScroll)
-  }, [])
 
   const filtered = items?.filter(item =>
     !item.name.startsWith('.') &&
@@ -93,31 +103,44 @@ export default function Media() {
     if (!grid) return 1
     const cards = grid.querySelectorAll('.card')
     if (cards.length < 2) return 1
-    const firstTop = cards[0].getBoundingClientRect().top
+    const firstTop = cards[0].offsetTop
     for (let i = 1; i < cards.length; i++) {
-      if (cards[i].getBoundingClientRect().top !== firstTop) return i
+      if (cards[i].offsetTop !== firstTop) return i
     }
     return cards.length
   }
 
   function scrollToCard(idx) {
     const grid = gridRef.current
-    const hdr = headerRef.current
-    if (!grid || !hdr) return
+    if (!grid) return
     const card = grid.querySelectorAll('.card')[idx]
     if (!card) return
     const rect = card.getBoundingClientRect()
-    const headerH = hdr.offsetHeight
-    if (rect.top < headerH) {
-      window.scrollBy(0, rect.top - headerH - 8)
+    if (rect.top < 8) {
+      window.scrollBy(0, rect.top - 8)
     } else if (rect.bottom > window.innerHeight) {
       window.scrollBy(0, rect.bottom - window.innerHeight + 8)
     }
   }
 
+  // Restore card selection when Nav gives focus back
+  useEffect(() => {
+    function onUnfocusNav() {
+      if (lastSelectedIdx.current >= 0) {
+        const idx = Math.min(lastSelectedIdx.current, visibleCards - 1)
+        setSelectedIdx(idx)
+        setTimeout(() => scrollToCard(idx), 0)
+        lastSelectedIdx.current = -1
+      }
+    }
+    window.addEventListener('unfocus-nav', onUnfocusNav)
+    return () => window.removeEventListener('unfocus-nav', onUnfocusNav)
+  }, [visibleCards])
+
   // keyboard nav
   useEffect(() => {
     function onKeyDown(e) {
+      if (document.body.classList.contains('nav-focused')) return
       const input = document.querySelector('.search-input')
       const inSearch = document.activeElement === input
 
@@ -128,16 +151,17 @@ export default function Media() {
         return
       }
 
-      if (!inSearch && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (e.key === 'c') {
-          const card = gridRef.current?.querySelectorAll('.card')[selectedIdx]
-          if (card) {
-            e.preventDefault()
-            const url = card.dataset.url
-            if (url) navigator.clipboard.writeText(window.location.origin + url).then(() => showToast('Copied'))
-          }
-          return
+      if (!inSearch && e.ctrlKey && e.key === 'c' && selectedIdx >= 0) {
+        const card = gridRef.current?.querySelectorAll('.card')[selectedIdx]
+        if (card) {
+          e.preventDefault()
+          const url = card.dataset.url
+          if (url) navigator.clipboard.writeText(window.location.origin + url).then(() => showToast('Copied URL'))
         }
+        return
+      }
+
+      if (!inSearch && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
         if (input) {
           input.focus()
           input.value = e.key
@@ -175,7 +199,14 @@ export default function Media() {
       } else if (e.key === 'ArrowLeft') {
         next = Math.max((selectedIdx < 0 ? 0 : selectedIdx) - 1, 0)
       } else if (e.key === 'ArrowDown') {
-        next = Math.min((selectedIdx < 0 ? 0 : selectedIdx) + cols, visibleCards - 1)
+        next = (selectedIdx < 0 ? 0 : selectedIdx) + cols
+        if (next >= visibleCards) {
+          e.preventDefault()
+          lastSelectedIdx.current = selectedIdx
+          setSelectedIdx(-1)
+          window.dispatchEvent(new Event('focus-nav'))
+          return
+        }
       } else if (e.key === 'ArrowUp') {
         next = (selectedIdx < 0 ? 0 : selectedIdx) - cols
         if (next < 0) {
@@ -191,6 +222,8 @@ export default function Media() {
           navigate(path.replace(/[^/]+\/$/, ''))
         } else if (filtered[adjustedIdx]?.is_dir) {
           navigate(path + filtered[adjustedIdx].name + '/')
+        } else if (filtered[adjustedIdx]) {
+          window.location.href = path + encodeURIComponent(filtered[adjustedIdx].name)
         }
         return
       } else return
@@ -204,27 +237,17 @@ export default function Media() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [selectedIdx, query, items, path, canGoUp, filtered, visibleCards, navigate])
 
-  if (denied) {
+  if (denied !== null) {
     return (
       <div className="page-media">
-        <Header path={path} headerRef={headerRef} onNavigate={navigate} />
-        <div className="denied">
-          <span className="material-symbols-sharp">lock</span>
-          <span>permission denied</span>
-        </div>
+        <pre className="denied-greet">{`# Error ${denied || '???'} — Not authorized`}</pre>
       </div>
     )
   }
 
   return (
     <div className="page-media">
-      <Header
-        path={path}
-        query={query}
-        onQueryChange={setQuery}
-        onNavigate={navigate}
-        headerRef={headerRef}
-      />
+      <Search query={query} onQueryChange={setQuery} />
       <div className="grid" ref={gridRef}>
         {canGoUp && (
           <Card
@@ -254,6 +277,7 @@ export default function Media() {
               selected={selectedIdx === idx}
               onClick={() => {
                 if (item.is_dir) navigate(path + item.name + '/')
+                else window.location.href = path + encodeURIComponent(item.name)
               }}
               onSelect={() => setSelectedIdx(idx)}
               onDownload={!item.is_dir ? () => {
